@@ -1,5 +1,5 @@
 // Test setup file for Vitest
-import { expect, afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
@@ -8,9 +8,15 @@ afterEach(() => {
   cleanup();
 });
 
-// Mock environment variables
-process.env.VITE_SUPABASE_URL = 'https://test-project.supabase.co';
-process.env.VITE_SUPABASE_ANON_KEY = 'test-anon-key';
+// Mock import.meta.env for Vite
+vi.stubGlobal('import', {
+  meta: {
+    env: {
+      VITE_SUPABASE_URL: 'https://test-project.supabase.co',
+      VITE_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRlc3QiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYzMDUyMDAwMCwiZXhwIjoxOTQ2MDk2MDAwfQ.test',
+    }
+  }
+});
 
 // Mock window.matchMedia (for Ant Design)
 Object.defineProperty(window, 'matchMedia', {
