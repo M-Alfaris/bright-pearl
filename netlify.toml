@@ -17,11 +17,32 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# Headers for security
+# Security headers - HARDENED
 [[headers]]
   for = "/*"
   [headers.values]
+    # Prevent clickjacking
     X-Frame-Options = "DENY"
+
+    # Prevent MIME type sniffing
     X-Content-Type-Options = "nosniff"
+
+    # Enable XSS protection (legacy browsers)
+    X-XSS-Protection = "1; mode=block"
+
+    # Strict referrer policy
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+
+    # Restrict feature permissions
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=()"
+
+    # Force HTTPS (HSTS) - 1 year, include subdomains
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+
+    # Content Security Policy (CSP)
+    # Allows Supabase, self, and inline styles (for Ant Design)
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+
+    # Additional security headers
+    X-Permitted-Cross-Domain-Policies = "none"
+    X-Download-Options = "noopen"

@@ -60,37 +60,18 @@ const authProvider: AuthProvider = {
     };
   },
   register: async ({ email, password }) => {
-    try {
-      const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) {
-        return {
-          success: false,
-          error,
-        };
-      }
-
-      if (data) {
-        return {
-          success: true,
-          redirectTo: "/",
-        };
-      }
-    } catch (error: any) {
-      return {
-        success: false,
-        error,
-      };
-    }
+    // SECURITY: Public registration is disabled.
+    // Moderators are invite-only and must be created by administrators.
+    // To add a new moderator:
+    // 1. Create user via Supabase Dashboard (Authentication > Users > Invite User)
+    // 2. Set user metadata: raw_user_meta_data.role = 'moderator'
+    // 3. Send them their login credentials
 
     return {
       success: false,
       error: {
-        message: "Register failed",
-        name: "Invalid email or password",
+        message: "Registration is disabled",
+        name: "Public registration is not allowed. Moderators are invite-only. Please contact an administrator.",
       },
     };
   },

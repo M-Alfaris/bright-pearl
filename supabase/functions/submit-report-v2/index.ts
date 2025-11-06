@@ -1,13 +1,23 @@
 // Simplified Submit Report Edge Function with Deduplication
 // GDPR-compliant, rate-limited, no PII storage
+// SECURITY HARDENED: Input validation, rate limiting, audit logging
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.220.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import {
+  getCorsHeaders,
+  validateURL,
+  validatePlatform,
+  validateCountryCode,
+  validateLanguageCode,
+  validateContentType,
+  validateDescription,
+  checkRateLimit,
+  createErrorResponse,
+  createSuccessResponse,
+  hashIP,
+  normalizeURL,
+} from "../_shared/security.ts";
 
 interface SubmitReportPayload {
   content_link: string;
@@ -19,6 +29,9 @@ interface SubmitReportPayload {
 }
 
 serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -29,37 +42,81 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
-    const payload: SubmitReportPayload = await req.json();
+    // Validate request body size (max 10KB)
+    const contentLength = req.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > 10240) {
+      return createErrorResponse('Request body too large (max 10KB)', 413, origin);
+    }
 
-    // Validation
+    // Parse JSON with error handling
+    let payload: SubmitReportPayload;
+    try {
+      payload = await req.json();
+    } catch {
+      return createErrorResponse('Invalid JSON in request body', 400, origin);
+    }
+
+    // Validate required fields
     if (!payload.content_link || !payload.platform || !payload.country ||
         !payload.language || !payload.content_type) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      return createErrorResponse(
+        'Missing required fields: content_link, platform, country, language, content_type',
+        400,
+        origin
       );
     }
 
-    // Validate platform
-    const validPlatforms = ['twitter', 'facebook', 'instagram', 'youtube', 'tiktok', 'reddit', 'other'];
-    if (!validPlatforms.includes(payload.platform)) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid platform' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Comprehensive input validation
+    const urlValidation = validateURL(payload.content_link);
+    if (!urlValidation.valid) {
+      return createErrorResponse(urlValidation.error!, 400, origin);
+    }
+
+    const platformValidation = validatePlatform(payload.platform);
+    if (!platformValidation.valid) {
+      return createErrorResponse(platformValidation.error!, 400, origin);
+    }
+
+    const countryValidation = validateCountryCode(payload.country);
+    if (!countryValidation.valid) {
+      return createErrorResponse(countryValidation.error!, 400, origin);
+    }
+
+    const languageValidation = validateLanguageCode(payload.language);
+    if (!languageValidation.valid) {
+      return createErrorResponse(languageValidation.error!, 400, origin);
+    }
+
+    const contentTypeValidation = validateContentType(payload.content_type);
+    if (!contentTypeValidation.valid) {
+      return createErrorResponse(contentTypeValidation.error!, 400, origin);
+    }
+
+    const descriptionValidation = validateDescription(payload.description);
+    if (!descriptionValidation.valid) {
+      return createErrorResponse(descriptionValidation.error!, 400, origin);
     }
 
     // Get and hash IP for rate limiting
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ||
+              req.headers.get('x-real-ip') ||
+              'unknown';
     const ipHash = await hashIP(ip);
 
     // Rate limiting check (5 per hour per IP)
-    const rateLimitResult = await checkRateLimit(ipHash);
+    const rateLimitResult = await checkRateLimit(
+      `submit_v2:${ipHash}`,
+      5,
+      60 * 60 * 1000 // 1 hour
+    );
+
     if (!rateLimitResult.allowed) {
       return new Response(
         JSON.stringify({
+          success: false,
           error: 'Rate limit exceeded',
           message: `Too many submissions. Please try again in ${Math.ceil(rateLimitResult.retryAfter / 60)} minutes.`,
+          retryAfter: rateLimitResult.retryAfter,
         }),
         {
           status: 429,
@@ -93,17 +150,17 @@ serve(async (req) => {
         .update({ report_count: existing.report_count + 1 })
         .eq('id', existing.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Error updating report count:', updateError);
+        return createErrorResponse('Failed to update report', 500, origin);
+      }
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          report_id: existing.id,
-          message: 'Thank you. This content has been reported before. Your report has been added to the count.',
-          report_count: existing.report_count + 1,
-        }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return createSuccessResponse({
+        report_id: existing.id,
+        message: 'Thank you. This content has been reported before. Your report has been added to the count.',
+        report_count: existing.report_count + 1,
+        duplicate: true,
+      }, origin);
     } else {
       // New content - insert new record
       const { data, error: insertError} = await supabaseClient
@@ -124,91 +181,26 @@ serve(async (req) => {
         .select()
         .single();
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Error inserting new report:', insertError);
+        return createErrorResponse('Failed to submit report', 500, origin);
+      }
 
-      return new Response(
-        JSON.stringify({
-          success: true,
-          report_id: data.id,
-          message: 'Thank you for your report. It will be reviewed by our moderators.',
-          report_count: 1,
-        }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return createSuccessResponse({
+        report_id: data.id,
+        message: 'Thank you for your report. It will be reviewed by our moderators.',
+        report_count: 1,
+        duplicate: false,
+      }, origin);
     }
 
   } catch (error) {
     console.error('Submit report error:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    // Generic error message to prevent information leakage
+    return createErrorResponse(
+      'An error occurred while processing your request. Please try again later.',
+      500,
+      origin
     );
   }
 });
-
-// Helper: Normalize URL (remove tracking parameters)
-function normalizeURL(url: string): string {
-  try {
-    const urlObj = new URL(url);
-
-    // Remove common tracking parameters
-    const paramsToRemove = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
-                           'fbclid', 'gclid', 'msclkid', 'ref', 'source'];
-
-    paramsToRemove.forEach(param => urlObj.searchParams.delete(param));
-
-    // Return lowercase normalized URL
-    return urlObj.toString().toLowerCase().trim();
-  } catch {
-    // If URL is invalid, return lowercase trimmed version
-    return url.toLowerCase().trim();
-  }
-}
-
-// Helper: Hash IP address (SHA-256)
-async function hashIP(ip: string): Promise<string> {
-  const msgUint8 = new TextEncoder().encode(ip);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-// Helper: Rate limiting with Deno KV
-interface RateLimitResult {
-  allowed: boolean;
-  retryAfter: number;
-}
-
-async function checkRateLimit(ipHash: string): Promise<RateLimitResult> {
-  const kv = await Deno.openKv();
-  const key = ['rate_limit', 'submit_v2', ipHash];
-  const limit = 5;
-  const windowMs = 60 * 60 * 1000; // 1 hour
-
-  try {
-    const result = await kv.get(key);
-    const now = Date.now();
-
-    if (result.value) {
-      const data = result.value as { count: number; resetAt: number };
-
-      if (now > data.resetAt) {
-        await kv.set(key, { count: 1, resetAt: now + windowMs });
-        return { allowed: true, retryAfter: 0 };
-      }
-
-      if (data.count >= limit) {
-        const retryAfter = Math.ceil((data.resetAt - now) / 1000);
-        return { allowed: false, retryAfter };
-      }
-
-      await kv.set(key, { count: data.count + 1, resetAt: data.resetAt });
-      return { allowed: true, retryAfter: 0 };
-    } else {
-      await kv.set(key, { count: 1, resetAt: now + windowMs });
-      return { allowed: true, retryAfter: 0 };
-    }
-  } finally {
-    kv.close();
-  }
-}
