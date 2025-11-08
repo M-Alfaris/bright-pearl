@@ -12,7 +12,7 @@ max_rows = 1000
 [db]
 port = 54322
 shadow_port = 54320
-major_version = 15
+major_version = 17
 
 [auth]
 enabled = true
@@ -29,14 +29,3 @@ enable_confirmations = false
 [storage]
 enabled = true
 file_size_limit = "50MB"
-
-[edge_functions]
-enabled = true
-
-[[edge_functions.functions]]
-name = "submit-report"
-verify_jwt = false
-
-[[edge_functions.functions]]
-name = "moderate-report"
-verify_jwt = true
