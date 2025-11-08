@@ -1,0 +1,147 @@
+# Artillery Load Testing Configuration
+# Bright Pearl - Report Submission System
+#
+# Installation:
+#   npm install -g artillery
+#
+# Usage:
+#   artillery run load-tests/artillery-config.yml
+#   artillery run --target https://your-domain.com load-tests/artillery-config.yml
+
+config:
+  target: "https://iwdfzvfqbtokqetmbmbp.supabase.co/functions/v1"
+  phases:
+    # Baseline Test - 5 minutes, 10 concurrent users
+    - duration: 300
+      arrivalRate: 2
+      name: "Baseline - 10 concurrent users"
+
+    # Ramp up - 5 minutes, gradually increase to 50 users
+    - duration: 300
+      arrivalRate: 2
+      rampTo: 10
+      name: "Ramp up to 50 concurrent users"
+
+    # Load Test - 30 minutes, sustained 50 users
+    - duration: 1800
+      arrivalRate: 10
+      name: "Load test - 50 concurrent users"
+
+    # Stress Test - 10 minutes, 100 users
+    - duration: 600
+      arrivalRate: 20
+      name: "Stress test - 100 concurrent users"
+
+  # Performance thresholds
+  ensure:
+    maxErrorRate: 1          # Max 1% error rate
+    p95: 2000                # 95th percentile < 2 seconds
+    p99: 5000                # 99th percentile < 5 seconds
+
+  # Variables
+  variables:
+    moderatorToken: "YOUR_MODERATOR_JWT_TOKEN"
+    testOrigin: "https://your-frontend-domain.com"
+
+  # HTTP settings
+  http:
+    timeout: 30
+    maxSockets: 100
+
+  # Custom metrics
+  plugins:
+    metrics-by-endpoint:
+      stripQueryString: true
+    expect: {}
+
+scenarios:
+  # Scenario 1: Submit Report (Public API)
+  - name: "Submit Report"
+    weight: 40
+    flow:
+      - post:
+          url: "/submit-report-v2"
+          headers:
+            Content-Type: "application/json"
+            Origin: "{{ testOrigin }}"
+          json:
+            link: "https://example.com/harmful-content-{{ $randomString() }}"
+            platform: "{{ $randomItem(['YouTube', 'Facebook', 'Instagram', 'Twitter', 'TikTok']) }}"
+            content_type: "{{ $randomItem(['video', 'image', 'text', 'live_stream']) }}"
+            description: "Load test report - {{ $randomString() }}"
+            country: "{{ $randomItem(['US', 'GB', 'CA', 'AU', 'DE']) }}"
+            language: "{{ $randomItem(['en', 'ar', 'es', 'fr', 'de']) }}"
+          expect:
+            - statusCode: 201
+            - contentType: json
+            - hasProperty: reportId
+          capture:
+            - json: "$.reportId"
+              as: "reportId"
+
+  # Scenario 2: Get Public Reports (Read-heavy)
+  - name: "Get Public Reports"
+    weight: 50
+    flow:
+      - get:
+          url: "/get-public-reports?page=1&limit=50"
+          headers:
+            Origin: "{{ testOrigin }}"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: reports
+
+      # Test pagination
+      - get:
+          url: "/get-public-reports?page={{ $randomNumber(1, 10) }}&limit=50"
+          headers:
+            Origin: "{{ testOrigin }}"
+          expect:
+            - statusCode: 200
+
+      # Test filtering
+      - get:
+          url: "/get-public-reports?status={{ $randomItem(['pending', 'approved', 'rejected']) }}&limit=20"
+          headers:
+            Origin: "{{ testOrigin }}"
+          expect:
+            - statusCode: 200
+
+  # Scenario 3: Approve/Reject Reports (Moderator)
+  - name: "Moderator Actions"
+    weight: 10
+    flow:
+      - post:
+          url: "/approve-report"
+          headers:
+            Content-Type: "application/json"
+            Authorization: "Bearer {{ moderatorToken }}"
+            Origin: "{{ testOrigin }}"
+          json:
+            report_id: "{{ $randomNumber(1, 1000) }}"
+            action: "{{ $randomItem(['approved', 'rejected']) }}"
+          expect:
+            - statusCode:
+                - 200
+                - 404  # Report may not exist
+            - contentType: json
+
+      - think: 2  # Wait 2 seconds between actions
+
+      - post:
+          url: "/update-status"
+          headers:
+            Content-Type: "application/json"
+            Authorization: "Bearer {{ moderatorToken }}"
+            Origin: "{{ testOrigin }}"
+          json:
+            report_id: "{{ $randomNumber(1, 1000) }}"
+            activity_status: "{{ $randomItem(['being_addressed', 'resolved', 'not_resolved']) }}"
+          expect:
+            - statusCode:
+                - 200
+                - 404
+
+# Custom functions for test data generation
+processor: "./artillery-processor.js"
