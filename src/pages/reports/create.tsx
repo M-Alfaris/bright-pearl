@@ -95,10 +95,10 @@ export const ReportCreate: React.FC = () => {
             <Card size="small" style={{ background: '#f5f5f5' }}>
               <Space direction="vertical" style={{ width: '100%' }}>
                 <Paragraph style={{ margin: 0 }}>
-                  <strong>Report ID:</strong> <Text code>#{reportResult.report_id}</Text>
+                  <strong>Report ID:</strong> <AntText code>#{reportResult.report_id}</AntText>
                 </Paragraph>
                 <Paragraph style={{ margin: 0 }}>
-                  <strong>Total Reports for this content:</strong> <Text type={reportResult.report_count > 10 ? 'danger' : 'secondary'}>{reportResult.report_count}</Text>
+                  <strong>Total Reports for this content:</strong> <AntText type={reportResult.report_count > 10 ? 'danger' : 'secondary'}>{reportResult.report_count}</AntText>
                 </Paragraph>
               </Space>
             </Card>
