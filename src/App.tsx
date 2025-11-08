@@ -85,8 +85,11 @@ function App() {
                 }}
               >
                 <Routes>
-                  {/* Public Routes - No authentication required */}
+                  {/* Landing Page - Always accessible */}
+                  <Route index element={<LandingPage />} />
                   <Route path="/" element={<LandingPage />} />
+
+                  {/* Public Routes - No authentication required */}
                   <Route path="/reports/create" element={<PublicLayout><ReportCreate /></PublicLayout>} />
                   <Route path="/reports/public" element={<PublicLayout><PublicDashboard /></PublicLayout>} />
                   <Route path="/statistics" element={<PublicLayout><Statistics /></PublicLayout>} />
@@ -127,7 +130,7 @@ function App() {
                         key="authenticated-outer"
                         fallback={<Outlet />}
                       >
-                        <NavigateToResource />
+                        <CatchAllNavigate to="/" />
                       </Authenticated>
                     }
                   >
