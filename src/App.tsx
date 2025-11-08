@@ -33,6 +33,7 @@ import {
 } from "./pages/reports";
 import { ModeratorPendingList } from "./pages/moderator";
 import { PublicDashboard } from "./pages/public-dashboard";
+import { LandingPage } from "./pages/landing";
 import { Statistics } from "./pages/statistics";
 import { About } from "./pages/about";
 import { Policies } from "./pages/policies";
@@ -85,9 +86,9 @@ function App() {
               >
                 <Routes>
                   {/* Public Routes - No authentication required */}
-                  <Route path="/" element={<PublicLayout><PublicDashboard /></PublicLayout>} />
-                  <Route path="/submit" element={<PublicLayout><ReportCreate /></PublicLayout>} />
-                  <Route path="/dashboard" element={<PublicLayout><PublicDashboard /></PublicLayout>} />
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/reports/create" element={<PublicLayout><ReportCreate /></PublicLayout>} />
+                  <Route path="/reports/public" element={<PublicLayout><PublicDashboard /></PublicLayout>} />
                   <Route path="/statistics" element={<PublicLayout><Statistics /></PublicLayout>} />
                   <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
                   <Route path="/policies" element={<PublicLayout><Policies /></PublicLayout>} />
