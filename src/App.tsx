@@ -18,7 +18,7 @@ import "@refinedev/antd/dist/reset.css";
 
 import { dataProvider, liveProvider } from "@refinedev/supabase";
 import { App as AntdApp } from "antd";
-import { BrowserRouter, Route, Routes, Outlet } from "react-router";
+import { BrowserRouter, Route, Routes, Outlet, Navigate } from "react-router";
 import routerProvider, {
   NavigateToResource,
   CatchAllNavigate,
@@ -95,6 +95,10 @@ function App() {
                   <Route path="/statistics" element={<PublicLayout><Statistics /></PublicLayout>} />
                   <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
                   <Route path="/policies" element={<PublicLayout><Policies /></PublicLayout>} />
+
+                  {/* Redirects for legacy/common routes */}
+                  <Route path="/dashboard" element={<Navigate to="/reports/public" replace />} />
+                  <Route path="/submit" element={<Navigate to="/reports/create" replace />} />
 
                   {/* Authenticated Routes - Login required */}
                   <Route
