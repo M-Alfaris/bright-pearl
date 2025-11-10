@@ -12,6 +12,9 @@ import {
   createSuccessResponse,
   hashIP,
 } from "../_shared/security.ts";
+import { createRequestLogger, logStartup } from "../_shared/logger.ts";
+
+logStartup('get-public-reports', '2.0.0');
 
 serve(async (req) => {
   const origin = req.headers.get('origin');

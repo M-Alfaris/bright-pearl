@@ -14,6 +14,9 @@ import {
   createErrorResponse,
   createSuccessResponse,
 } from "../_shared/security.ts";
+import { createRequestLogger, logStartup } from "../_shared/logger.ts";
+
+logStartup('update-status', '2.0.0');
 
 interface UpdateStatusPayload {
   report_id: number;
@@ -21,8 +24,12 @@ interface UpdateStatusPayload {
 }
 
 serve(async (req) => {
+  const logger = createRequestLogger(req);
+  const timer = logger.startTimer();
   const origin = req.headers.get('origin');
   const corsHeaders = getCorsHeaders(origin);
+
+  logger.logRequest(req.method, '/update-status', { origin });
 
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -34,15 +41,20 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
+    logger.debug('Supabase client initialized');
+
     // Verify moderator authentication and role
     const authHeader = req.headers.get('Authorization');
     const authResult = await verifyModerator(supabaseClient, authHeader);
 
     if (!authResult.success) {
+      logger.logAuthentication(false, undefined, authResult.error);
       return createErrorResponse(authResult.error, authResult.status, origin);
     }
 
     const moderator = authResult.user;
+    logger.logAuthentication(true, moderator.id);
+    logger.setContext({ moderatorId: moderator.id });
 
     // Rate limiting for moderators (100 actions per hour)
     const rateLimitResult = await checkRateLimit(
@@ -103,6 +115,12 @@ serve(async (req) => {
     }
 
     // Update activity status
+    logger.info('Updating activity status', {
+      reportId: payload.report_id,
+      activityStatus: payload.activity_status,
+      previousStatus: report.activity_status
+    });
+
     const { data: updated, error: updateError } = await supabaseClient
       .from('reports')
       .update({
@@ -114,17 +132,31 @@ serve(async (req) => {
       .single();
 
     if (updateError) {
-      console.error('Error updating activity status:', updateError);
+      logger.error('Failed to update activity status', updateError as any, {
+        reportId: payload.report_id,
+        code: updateError.code,
+        details: updateError.details,
+        hint: updateError.hint
+      });
+      logger.logDatabaseOperation('UPDATE', 'reports', false);
       return createErrorResponse('Failed to update activity status', 500, origin);
     }
 
+    logger.logDatabaseOperation('UPDATE', 'reports', true);
+
     // Log moderator action for audit trail
+    logger.info('Logging moderator action for update_status');
     await logModeratorAction(
       supabaseClient,
       payload.report_id,
       moderator.id,
       'update_status'
     );
+
+    logger.logModeratorAction(moderator.id, 'update_status', payload.report_id, true);
+
+    const duration = timer();
+    logger.logResponse(req.method, '/update-status', 200, duration);
 
     return createSuccessResponse({
       report: updated,
@@ -134,7 +166,12 @@ serve(async (req) => {
     }, origin);
 
   } catch (error) {
-    console.error('Update status error:', error);
+    logger.critical('Unhandled error in update-status', error as Error, {
+      errorType: (error as Error).constructor.name,
+      errorMessage: (error as Error).message
+    });
+    const duration = timer();
+    logger.logResponse(req.method, '/update-status', 500, duration);
     // Generic error message to prevent information leakage
     return createErrorResponse(
       'An error occurred while processing your request. Please try again later.',
