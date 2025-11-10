@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Row, Col, Card, Statistic, Typography } from 'antd';
+import React from 'react';
+import { Button, Row, Col, Card, Statistic, Typography, Space } from 'antd';
 import {
   SafetyOutlined,
   GlobalOutlined,
@@ -8,373 +8,539 @@ import {
   RocketOutlined,
   CheckCircleOutlined,
   ArrowRightOutlined,
+  DashboardOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
-import './landing.css';
 
 const { Title, Paragraph, Text } = Typography;
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    element?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   return (
-    <div className="landing-page">
+    <div style={{ background: '#fff' }}>
       {/* Hero Section */}
-      <section className={`hero-section ${isVisible ? 'fade-in' : ''}`}>
-        <div className="hero-background">
-          <div className="gradient-overlay"></div>
-          <div className="animated-shapes">
-            <div className="shape shape-1"></div>
-            <div className="shape shape-2"></div>
-            <div className="shape shape-3"></div>
-          </div>
-        </div>
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          padding: '80px 24px',
+          textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Background Pattern */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            opacity: 0.1,
+            backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
+            backgroundSize: '50px 50px',
+          }}
+        />
 
-        <div className="hero-content container">
-          <div className="hero-badge">
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1000, margin: '0 auto' }}>
+          {/* Badge */}
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '8px 20px',
+              background: 'rgba(255,255,255,0.2)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: 50,
+              color: '#fff',
+              fontSize: 13,
+              fontWeight: 600,
+              marginBottom: 24,
+              border: '1px solid rgba(255,255,255,0.3)',
+            }}
+          >
             <ThunderboltOutlined /> Tech for Good
           </div>
 
-          <Title level={1} className="hero-title">
-            Protecting Muslim Communities
-            <br />
-            <span className="gradient-text">From Harmful Content</span>
+          {/* Hero Title */}
+          <Title
+            level={1}
+            style={{
+              color: '#fff',
+              fontSize: 'clamp(32px, 8vw, 64px)',
+              fontWeight: 800,
+              lineHeight: 1.2,
+              marginBottom: 24,
+              textShadow: '0 2px 20px rgba(0,0,0,0.2)',
+            }}
+          >
+            Protecting Muslim Communities<br />
+            From Harmful Content
           </Title>
 
-          <Paragraph className="hero-subtitle">
-            A bold platform empowering the global Muslim community to report,
-            track, and eliminate harmful content across social media. Together,
-            we're building a safer digital world for 2 billion voices.
+          {/* Hero Subtitle */}
+          <Paragraph
+            style={{
+              color: 'rgba(255,255,255,0.95)',
+              fontSize: 'clamp(16px, 3vw, 20px)',
+              lineHeight: 1.6,
+              maxWidth: 700,
+              margin: '0 auto 40px',
+            }}
+          >
+            A bold platform empowering the global Muslim community to report, track, and eliminate harmful content across social media. Together, we're building a safer digital world for 2 billion voices.
           </Paragraph>
 
-          <div className="hero-cta">
+          {/* CTA Buttons */}
+          <Space wrap style={{ justifyContent: 'center', marginBottom: 48 }}>
             <Button
               type="primary"
               size="large"
               icon={<SafetyOutlined />}
               onClick={() => navigate('/reports/create')}
-              className="cta-primary"
+              style={{
+                height: 50,
+                fontSize: 16,
+                fontWeight: 600,
+                borderRadius: 8,
+                boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+              }}
             >
               Report Harmful Content
             </Button>
             <Button
               size="large"
-              onClick={() => scrollToSection('how-it-works')}
-              className="cta-secondary"
+              onClick={() => navigate('/reports/public')}
+              style={{
+                height: 50,
+                fontSize: 16,
+                fontWeight: 600,
+                borderRadius: 8,
+                background: 'rgba(255,255,255,0.2)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                color: '#fff',
+              }}
             >
-              Learn How It Works
+              View Dashboard
             </Button>
-          </div>
+          </Space>
 
-          <div className="hero-stats">
-            <div className="stat-item">
-              <div className="stat-number">2B+</div>
-              <div className="stat-label">Muslims Worldwide</div>
-            </div>
-            <div className="stat-divider"></div>
-            <div className="stat-item">
-              <div className="stat-number">50+</div>
-              <div className="stat-label">Countries Covered</div>
-            </div>
-            <div className="stat-divider"></div>
-            <div className="stat-item">
-              <div className="stat-number">24/7</div>
-              <div className="stat-label">Active Monitoring</div>
-            </div>
-          </div>
+          {/* Stats */}
+          <Row gutter={[24, 24]} style={{ maxWidth: 800, margin: '0 auto' }}>
+            <Col xs={8}>
+              <div style={{ color: '#fff' }}>
+                <div style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 700, marginBottom: 8 }}>
+                  2B+
+                </div>
+                <div style={{ fontSize: 'clamp(12px, 2vw, 14px)', opacity: 0.9 }}>
+                  Muslims Worldwide
+                </div>
+              </div>
+            </Col>
+            <Col xs={8}>
+              <div style={{ color: '#fff' }}>
+                <div style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 700, marginBottom: 8 }}>
+                  50+
+                </div>
+                <div style={{ fontSize: 'clamp(12px, 2vw, 14px)', opacity: 0.9 }}>
+                  Countries
+                </div>
+              </div>
+            </Col>
+            <Col xs={8}>
+              <div style={{ color: '#fff' }}>
+                <div style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 700, marginBottom: 8 }}>
+                  24/7
+                </div>
+                <div style={{ fontSize: 'clamp(12px, 2vw, 14px)', opacity: 0.9 }}>
+                  Active
+                </div>
+              </div>
+            </Col>
+          </Row>
         </div>
-
-        <div className="scroll-indicator" onClick={() => scrollToSection('mission')}>
-          <div className="scroll-arrow"></div>
-        </div>
-      </section>
+      </div>
 
       {/* Mission Section */}
-      <section id="mission" className="mission-section container">
-        <div className="section-header">
-          <Text className="section-tag">Our Mission</Text>
-          <Title level={2}>Tech for Good. Action for Change.</Title>
-          <Paragraph className="section-description">
-            We're leveraging advanced technology to create a global movement
-            against harmful content targeting Muslim communities worldwide.
-          </Paragraph>
-        </div>
-
-        <Row gutter={[32, 32]} className="mission-grid">
-          <Col xs={24} md={8}>
-            <Card className="mission-card" bordered={false}>
-              <div className="mission-icon">
-                <GlobalOutlined />
-              </div>
-              <Title level={3}>Global Reach</Title>
-              <Paragraph>
-                Empowering Muslims across 50+ countries to protect their
-                communities from hate speech, misinformation, and harmful
-                content on major platforms.
-              </Paragraph>
-            </Card>
-          </Col>
-
-          <Col xs={24} md={8}>
-            <Card className="mission-card" bordered={false}>
-              <div className="mission-icon">
-                <ThunderboltOutlined />
-              </div>
-              <Title level={3}>Rapid Response</Title>
-              <Paragraph>
-                Fast-tracked reporting system with real-time monitoring and
-                coordinated action to address harmful content within hours, not
-                days.
-              </Paragraph>
-            </Card>
-          </Col>
-
-          <Col xs={24} md={8}>
-            <Card className="mission-card" bordered={false}>
-              <div className="mission-icon">
-                <TeamOutlined />
-              </div>
-              <Title level={3}>Community Powered</Title>
-              <Paragraph>
-                Built by the community, for the community. Every report
-                strengthens our collective voice and drives meaningful change.
-              </Paragraph>
-            </Card>
-          </Col>
-        </Row>
-      </section>
-
-      {/* How It Works Section */}
-      <section id="how-it-works" className="how-it-works-section">
-        <div className="container">
-          <div className="section-header">
-            <Text className="section-tag">Simple. Powerful. Effective.</Text>
-            <Title level={2}>How Bright Pearl Works</Title>
+      <div style={{ padding: 'clamp(40px, 8vw, 80px) 24px', background: '#f9fafb' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <Text
+              style={{
+                display: 'inline-block',
+                padding: '6px 16px',
+                background: '#e6f7ff',
+                color: '#1890ff',
+                borderRadius: 20,
+                fontSize: 13,
+                fontWeight: 600,
+                marginBottom: 16,
+              }}
+            >
+              Our Mission
+            </Text>
+            <Title level={2} style={{ marginBottom: 16, fontSize: 'clamp(24px, 5vw, 36px)' }}>
+              Tech for Good. Action for Change.
+            </Title>
+            <Paragraph style={{ fontSize: 'clamp(14px, 2.5vw, 18px)', color: '#666', maxWidth: 700, margin: '0 auto' }}>
+              We're leveraging advanced technology to create a global movement against harmful content targeting Muslim communities worldwide.
+            </Paragraph>
           </div>
 
-          <div className="steps-container">
-            <div className="step-item">
-              <div className="step-number">01</div>
-              <div className="step-content">
-                <Title level={3}>Report</Title>
-                <Paragraph>
-                  Found harmful content? Submit a report with the link, platform,
-                  and description. It takes less than 60 seconds.
+          <Row gutter={[24, 24]}>
+            <Col xs={24} md={8}>
+              <Card
+                bordered={false}
+                style={{
+                  height: '100%',
+                  textAlign: 'center',
+                  borderRadius: 12,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                }}
+              >
+                <div
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 24px',
+                  }}
+                >
+                  <GlobalOutlined style={{ fontSize: 32, color: '#fff' }} />
+                </div>
+                <Title level={4} style={{ marginBottom: 16, fontSize: 'clamp(18px, 3vw, 22px)' }}>
+                  Global Reach
+                </Title>
+                <Paragraph style={{ color: '#666', fontSize: 'clamp(14px, 2vw, 16px)' }}>
+                  Empowering Muslims across 50+ countries to protect their communities from hate speech, misinformation, and harmful content on major platforms.
                 </Paragraph>
-              </div>
-              <div className="step-visual">
-                <SafetyOutlined />
-              </div>
-            </div>
+              </Card>
+            </Col>
 
-            <div className="step-connector"></div>
-
-            <div className="step-item">
-              <div className="step-number">02</div>
-              <div className="step-content">
-                <Title level={3}>Track</Title>
-                <Paragraph>
-                  Our system aggregates identical reports, creating a unified
-                  voice. Track the status of your report in real-time.
+            <Col xs={24} md={8}>
+              <Card
+                bordered={false}
+                style={{
+                  height: '100%',
+                  textAlign: 'center',
+                  borderRadius: 12,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                }}
+              >
+                <div
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #fa8c16 0%, #faad14 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 24px',
+                  }}
+                >
+                  <ThunderboltOutlined style={{ fontSize: 32, color: '#fff' }} />
+                </div>
+                <Title level={4} style={{ marginBottom: 16, fontSize: 'clamp(18px, 3vw, 22px)' }}>
+                  Rapid Response
+                </Title>
+                <Paragraph style={{ color: '#666', fontSize: 'clamp(14px, 2vw, 16px)' }}>
+                  Fast-tracked reporting system with real-time monitoring and coordinated action to address harmful content within hours, not days.
                 </Paragraph>
-              </div>
-              <div className="step-visual">
-                <RocketOutlined />
-              </div>
-            </div>
+              </Card>
+            </Col>
 
-            <div className="step-connector"></div>
-
-            <div className="step-item">
-              <div className="step-number">03</div>
-              <div className="step-content">
-                <Title level={3}>Impact</Title>
-                <Paragraph>
-                  Moderators review and escalate high-priority content to
-                  platforms. See the real-world impact of community action.
+            <Col xs={24} md={8}>
+              <Card
+                bordered={false}
+                style={{
+                  height: '100%',
+                  textAlign: 'center',
+                  borderRadius: 12,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                }}
+              >
+                <div
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 24px',
+                  }}
+                >
+                  <TeamOutlined style={{ fontSize: 32, color: '#fff' }} />
+                </div>
+                <Title level={4} style={{ marginBottom: 16, fontSize: 'clamp(18px, 3vw, 22px)' }}>
+                  Community Powered
+                </Title>
+                <Paragraph style={{ color: '#666', fontSize: 'clamp(14px, 2vw, 16px)' }}>
+                  Built by the community, for the community. Every report strengthens our collective voice and drives meaningful change.
                 </Paragraph>
-              </div>
-              <div className="step-visual">
-                <CheckCircleOutlined />
-              </div>
-            </div>
+              </Card>
+            </Col>
+          </Row>
+        </div>
+      </div>
+
+      {/* How It Works */}
+      <div style={{ padding: 'clamp(40px, 8vw, 80px) 24px', background: '#fff' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <Text
+              style={{
+                display: 'inline-block',
+                padding: '6px 16px',
+                background: '#fff7e6',
+                color: '#fa8c16',
+                borderRadius: 20,
+                fontSize: 13,
+                fontWeight: 600,
+                marginBottom: 16,
+              }}
+            >
+              Simple. Powerful. Effective.
+            </Text>
+            <Title level={2} style={{ marginBottom: 16, fontSize: 'clamp(24px, 5vw, 36px)' }}>
+              How Bright Pearl Works
+            </Title>
           </div>
-        </div>
-      </section>
 
-      {/* Impact Section */}
-      <section className="impact-section container">
-        <div className="section-header">
-          <Text className="section-tag">Real Impact. Real Change.</Text>
-          <Title level={2}>Making a Difference Globally</Title>
-          <Paragraph className="section-description">
-            Every report contributes to a safer digital space for Muslim
-            communities worldwide.
-          </Paragraph>
-        </div>
+          <Row gutter={[24, 24]}>
+            <Col xs={24} md={8}>
+              <Card bordered={false} style={{ textAlign: 'center', background: '#f0f5ff', borderRadius: 12 }}>
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '50%',
+                    background: '#1890ff',
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                    fontSize: 20,
+                    fontWeight: 700,
+                  }}
+                >
+                  1
+                </div>
+                <Title level={4} style={{ marginBottom: 12, fontSize: 'clamp(18px, 3vw, 22px)' }}>
+                  <SafetyOutlined style={{ marginRight: 8 }} />
+                  Report
+                </Title>
+                <Paragraph style={{ color: '#666', fontSize: 'clamp(14px, 2vw, 16px)' }}>
+                  Found harmful content? Submit a report with the link, platform, and description. Takes less than 60 seconds.
+                </Paragraph>
+              </Card>
+            </Col>
 
-        <Row gutter={[48, 48]} align="middle">
-          <Col xs={24} lg={12}>
-            <div className="impact-stats-grid">
-              <Card className="stat-card" bordered={false}>
+            <Col xs={24} md={8}>
+              <Card bordered={false} style={{ textAlign: 'center', background: '#fff7e6', borderRadius: 12 }}>
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '50%',
+                    background: '#fa8c16',
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                    fontSize: 20,
+                    fontWeight: 700,
+                  }}
+                >
+                  2
+                </div>
+                <Title level={4} style={{ marginBottom: 12, fontSize: 'clamp(18px, 3vw, 22px)' }}>
+                  <RocketOutlined style={{ marginRight: 8 }} />
+                  Track
+                </Title>
+                <Paragraph style={{ color: '#666', fontSize: 'clamp(14px, 2vw, 16px)' }}>
+                  Our system aggregates identical reports, creating a unified voice. Track the status of your report in real-time.
+                </Paragraph>
+              </Card>
+            </Col>
+
+            <Col xs={24} md={8}>
+              <Card bordered={false} style={{ textAlign: 'center', background: '#f6ffed', borderRadius: 12 }}>
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '50%',
+                    background: '#52c41a',
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px',
+                    fontSize: 20,
+                    fontWeight: 700,
+                  }}
+                >
+                  3
+                </div>
+                <Title level={4} style={{ marginBottom: 12, fontSize: 'clamp(18px, 3vw, 22px)' }}>
+                  <CheckCircleOutlined style={{ marginRight: 8 }} />
+                  Impact
+                </Title>
+                <Paragraph style={{ color: '#666', fontSize: 'clamp(14px, 2vw, 16px)' }}>
+                  Moderators review and escalate high-priority content to platforms. See the real-world impact of community action.
+                </Paragraph>
+              </Card>
+            </Col>
+          </Row>
+        </div>
+      </div>
+
+      {/* Impact Stats */}
+      <div style={{ padding: 'clamp(40px, 8vw, 80px) 24px', background: '#f9fafb' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <Text
+              style={{
+                display: 'inline-block',
+                padding: '6px 16px',
+                background: '#f6ffed',
+                color: '#52c41a',
+                borderRadius: 20,
+                fontSize: 13,
+                fontWeight: 600,
+                marginBottom: 16,
+              }}
+            >
+              Real Impact. Real Change.
+            </Text>
+            <Title level={2} style={{ marginBottom: 16, fontSize: 'clamp(24px, 5vw, 36px)' }}>
+              Making a Difference Globally
+            </Title>
+          </div>
+
+          <Row gutter={[24, 24]}>
+            <Col xs={12} md={6}>
+              <Card bordered={false} style={{ textAlign: 'center', borderRadius: 12 }}>
                 <Statistic
                   title="Reports Submitted"
                   value={15000}
                   prefix={<SafetyOutlined />}
                   suffix="+"
-                  valueStyle={{ color: '#1890ff' }}
+                  valueStyle={{ color: '#1890ff', fontSize: 'clamp(24px, 4vw, 36px)' }}
                 />
               </Card>
-
-              <Card className="stat-card" bordered={false}>
+            </Col>
+            <Col xs={12} md={6}>
+              <Card bordered={false} style={{ textAlign: 'center', borderRadius: 12 }}>
                 <Statistic
                   title="Content Removed"
                   value={8500}
                   prefix={<CheckCircleOutlined />}
                   suffix="+"
-                  valueStyle={{ color: '#52c41a' }}
+                  valueStyle={{ color: '#52c41a', fontSize: 'clamp(24px, 4vw, 36px)' }}
                 />
               </Card>
-
-              <Card className="stat-card" bordered={false}>
+            </Col>
+            <Col xs={12} md={6}>
+              <Card bordered={false} style={{ textAlign: 'center', borderRadius: 12 }}>
                 <Statistic
-                  title="Active Communities"
+                  title="Communities"
                   value={50}
                   prefix={<GlobalOutlined />}
                   suffix="+"
-                  valueStyle={{ color: '#722ed1' }}
+                  valueStyle={{ color: '#722ed1', fontSize: 'clamp(24px, 4vw, 36px)' }}
                 />
               </Card>
-
-              <Card className="stat-card" bordered={false}>
+            </Col>
+            <Col xs={12} md={6}>
+              <Card bordered={false} style={{ textAlign: 'center', borderRadius: 12 }}>
                 <Statistic
                   title="Response Time"
                   value={24}
                   prefix={<ThunderboltOutlined />}
                   suffix="hrs"
-                  valueStyle={{ color: '#fa8c16' }}
+                  valueStyle={{ color: '#fa8c16', fontSize: 'clamp(24px, 4vw, 36px)' }}
                 />
               </Card>
-            </div>
-          </Col>
-
-          <Col xs={24} lg={12}>
-            <div className="impact-content">
-              <Title level={3}>Protecting Communities Across Platforms</Title>
-              <Paragraph>
-                From YouTube to Facebook, Instagram to Twitter, Bright Pearl
-                monitors harmful content across all major social media
-                platforms where Muslim communities are targeted.
-              </Paragraph>
-
-              <div className="impact-list">
-                <div className="impact-item">
-                  <CheckCircleOutlined className="impact-check" />
-                  <Text>Hate speech and Islamophobic content</Text>
-                </div>
-                <div className="impact-item">
-                  <CheckCircleOutlined className="impact-check" />
-                  <Text>Misinformation and propaganda</Text>
-                </div>
-                <div className="impact-item">
-                  <CheckCircleOutlined className="impact-check" />
-                  <Text>Harassment and targeted attacks</Text>
-                </div>
-                <div className="impact-item">
-                  <CheckCircleOutlined className="impact-check" />
-                  <Text>Violent and extremist content</Text>
-                </div>
-              </div>
-            </div>
-          </Col>
-        </Row>
-      </section>
-
-      {/* CTA Section */}
-      <section className="cta-section">
-        <div className="cta-background">
-          <div className="gradient-overlay"></div>
+            </Col>
+          </Row>
         </div>
+      </div>
 
-        <div className="cta-content container">
-          <Title level={2} className="cta-title">
+      {/* Final CTA */}
+      <div
+        style={{
+          padding: 'clamp(60px, 10vw, 100px) 24px',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ maxWidth: 800, margin: '0 auto' }}>
+          <Title level={2} style={{ color: '#fff', marginBottom: 24, fontSize: 'clamp(24px, 5vw, 42px)' }}>
             Ready to Make an Impact?
           </Title>
-          <Paragraph className="cta-subtitle">
-            Join thousands of community members protecting Muslim voices online.
-            Your report can make a difference.
+          <Paragraph style={{ color: 'rgba(255,255,255,0.95)', fontSize: 'clamp(16px, 3vw, 20px)', marginBottom: 40 }}>
+            Join thousands of community members protecting Muslim voices online. Your report can make a difference.
           </Paragraph>
 
-          <div className="cta-buttons">
+          <Space wrap style={{ justifyContent: 'center', marginBottom: 32 }}>
             <Button
               type="primary"
               size="large"
               icon={<SafetyOutlined />}
               onClick={() => navigate('/reports/create')}
-              className="cta-primary-btn"
+              style={{
+                height: 56,
+                fontSize: 18,
+                fontWeight: 600,
+                borderRadius: 8,
+                background: '#fff',
+                color: '#667eea',
+                border: 'none',
+              }}
             >
               Submit a Report Now
               <ArrowRightOutlined />
             </Button>
             <Button
               size="large"
+              icon={<DashboardOutlined />}
               onClick={() => navigate('/reports/public')}
-              className="cta-secondary-btn"
+              style={{
+                height: 56,
+                fontSize: 18,
+                fontWeight: 600,
+                borderRadius: 8,
+                background: 'rgba(255,255,255,0.2)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                color: '#fff',
+              }}
             >
-              View Public Reports
+              View Public Dashboard
             </Button>
-          </div>
+          </Space>
 
-          <div className="cta-assurance">
-            <CheckCircleOutlined /> Your privacy is protected. All reports are
-            handled securely and confidentially.
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="landing-footer">
-        <div className="container">
-          <Row gutter={[32, 32]}>
-            <Col xs={24} md={12}>
-              <Title level={4} style={{ color: '#fff' }}>
-                Bright Pearl
-              </Title>
-              <Paragraph style={{ color: 'rgba(255,255,255,0.7)' }}>
-                Tech for Good. Empowering Muslim communities to create a safer
-                digital world through collective action and advanced technology.
-              </Paragraph>
-            </Col>
-
-            <Col xs={24} md={12}>
-              <Title level={4} style={{ color: '#fff' }}>
-                Global Coverage
-              </Title>
-              <Paragraph style={{ color: 'rgba(255,255,255,0.7)' }}>
-                Supporting communities across North America, Europe, Middle East,
-                Asia, Africa, and beyond. Available in multiple languages
-                including English and Arabic.
-              </Paragraph>
-            </Col>
-          </Row>
-
-          <div className="footer-bottom">
-            <Text style={{ color: 'rgba(255,255,255,0.5)' }}>
-              © 2025 Bright Pearl. Building a safer digital future for all.
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: 'rgba(255,255,255,0.9)' }}>
+            <CheckCircleOutlined />
+            <Text style={{ color: 'rgba(255,255,255,0.9)', fontSize: 'clamp(12px, 2vw, 14px)' }}>
+              Your privacy is protected. All reports are handled securely and confidentially.
             </Text>
           </div>
         </div>
-      </footer>
+      </div>
     </div>
   );
 };
