@@ -565,7 +565,7 @@ export const PublicDashboard: React.FC = () => {
         width={400}
       >
         <Collapse
-          defaultActiveKeys={['platform', 'status']}
+          defaultActiveKey={['platform', 'status']}
           ghost
         >
           <Collapse.Panel
