@@ -59,7 +59,7 @@ const authProvider: AuthProvider = {
       },
     };
   },
-  register: async ({ email, password }) => {
+  register: async () => {
     // SECURITY: Public registration is disabled.
     // Moderators are invite-only and must be created by administrators.
     // To add a new moderator:
