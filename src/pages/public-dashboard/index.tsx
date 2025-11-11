@@ -76,13 +76,12 @@ export const PublicDashboard: React.FC = () => {
     setStatsLoading(true);
     try {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const authToken = localStorage.getItem('sb-access-token') || '';
 
-      // Fetch all approved reports to calculate stats
+      // Fetch all approved reports to calculate stats (PUBLIC ACCESS - no auth needed)
       const response = await fetch(`${supabaseUrl}/rest/v1/reports?status=eq.approved&select=id,report_count,activity_status`, {
         headers: {
           'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${authToken}`,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
       });
 
