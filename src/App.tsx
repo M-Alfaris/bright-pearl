@@ -86,8 +86,8 @@ function App() {
               >
                 <Routes>
                   {/* Landing Page - Always accessible */}
-                  <Route index element={<LandingPage />} />
-                  <Route path="/" element={<LandingPage />} />
+                  <Route index element={<PublicLayout><LandingPage /></PublicLayout>} />
+                  <Route path="/" element={<PublicLayout><LandingPage /></PublicLayout>} />
 
                   {/* Public Routes - No authentication required */}
                   <Route path="/reports/create" element={<PublicLayout><ReportCreate /></PublicLayout>} />
